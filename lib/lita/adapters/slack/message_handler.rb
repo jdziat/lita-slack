@@ -40,10 +40,10 @@ module Lita
 
         def body
           normalized_message = if data["text"]
-            data["text"].sub(/^\s*<@#{robot_id}>/, "@#{robot.mention_name}")
-          end
+                                 data["text"].sub(/^\s*<@#{robot_id}>/, "@#{robot.mention_name}")
+                               end
 
-         normalized_message = remove_formatting(normalized_message) unless normalized_message.nil?
+          normalized_message = remove_formatting(normalized_message) unless normalized_message.nil?
 
           attachment_text = Array(data["attachments"]).map do |attachment|
             attachment["text"] || attachment["fallback"]
@@ -67,39 +67,39 @@ module Lita
             label = Regexp.last_match[:label]
 
             case Regexp.last_match[:type]
-              when '@'
-                if label
-                  label
-                else
-                  user = User.find_by_id(link)
-                  if user
-                    "@#{user.mention_name}"
-                  else
-                    "@#{link}"
-                  end
-                end
-
-              when '#'
-                if label
-                  label
-                else
-                  channel = Lita::Room.find_by_id(link)
-                  if channel
-                    "\##{channel.name}"
-                  else
-                    "\##{link}"
-                  end
-                end
-
-              when '!'
-                "@#{link}" if ['channel', 'group', 'everyone'].include? link
+            when '@'
+              if label
+                label
               else
-                link = link.gsub /^mailto:/, ''
-                if label && !(link.include? label)
-                  "#{label} (#{link})"
+                user = User.find_by_id(link)
+                if user
+                  "@#{user.mention_name}"
                 else
-                  label == nil ? link : label
+                  "@#{link}"
                 end
+              end
+
+            when '#'
+              if label
+                label
+              else
+                channel = Lita::Room.find_by_id(link)
+                if channel
+                  "\##{channel.name}"
+                else
+                  "\##{link}"
+                end
+              end
+
+            when '!'
+              "@#{link}" if ['channel', 'group', 'everyone'].include? link
+            else
+              link = link.gsub /^mailto:/, ''
+              if label && !(link.include? label)
+                "#{label} (#{link})"
+              else
+                label == nil ? link : label
+              end
             end
           end
           message.gsub('&lt;', '<')
@@ -169,7 +169,7 @@ module Lita
           user = User.find_by_id(data["user"])
           if user.nil?
             user_data = API.new(robot.config.adapters.slack).user_info(data["user"])['user']
-            user = User.create( user_id, user_data )
+            user = SlackUser.from_data(user_data)
           end
 
           dispatch_message(user)

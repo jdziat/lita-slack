@@ -26,7 +26,7 @@ module Lita
       # Starts the connection.
       def run
         return if rtm_connection
-
+        puts config
         @rtm_connection = RTMConnection.build(robot, config)
         rtm_connection.run
       end

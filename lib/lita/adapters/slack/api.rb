@@ -56,7 +56,7 @@ module Lita
             as_user: true,
             channel: room_or_user.id,
             attachments: MultiJson.dump(attachments.map(&:to_hash)),
-          )
+            )
         end
 
         def send_messages(channel_id, messages, additional_payload = {})
@@ -76,19 +76,18 @@ module Lita
 
         def rtm_connect
           response_data = connection.get(
-            "https://slack.com/api/rtm.connect",
-            headers=           { authorization: config.token }
+            "https://slack.com/api/rtm.connect",nil, headers={ Authorization: "Bearer #{config.token}"   }
           )
-
-          raise RuntimeError, response_data["error"] if response_data["ok"] != true
+          data = parse_response(response_data, "rtm.connect")
+          raise RuntimeError, data["error"] if data["ok"] != true
 
           TeamData.new(
-            response_data["team"]["id"],
-            response_data["team"]["name"],
-            response_data["team"]["domain"],
-            SlackUser.from_data(response_data["self"]),
-            response_data["url"],
-          )
+            data["team"]["id"],
+            data["team"]["name"],
+            data["team"]["domain"],
+            SlackUser.from_data(data["self"]),
+            data["url"],
+            )
         end
 
         private

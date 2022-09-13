@@ -75,7 +75,10 @@ module Lita
         end
 
         def rtm_connect
-          response_data = call_api("rtm.connect")
+          response_data = connection.get(
+            "https://slack.com/api/rtm.connect",
+            headers=           { authorization: config.token }
+          )
 
           raise RuntimeError, response_data["error"] if response_data["ok"] != true
 
